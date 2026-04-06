@@ -116,18 +116,12 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
           <p className="text-4xl font-bold tabular-nums leading-none mt-auto">{activeMembers}</p>
         </div>
 
-        <div
-          className="bento-tile-tinted"
-          style={{ background: 'color-mix(in oklch, var(--color-primary) 18%, transparent)' }}
-        >
+        <div className="bento-tile">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Elders Quorum</p>
           <p className="text-4xl font-bold tabular-nums leading-none mt-auto">{eqCount}</p>
         </div>
 
-        <div
-          className="bento-tile-tinted"
-          style={{ background: 'color-mix(in oklch, var(--color-secondary) 18%, transparent)' }}
-        >
+        <div className="bento-tile">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Relief Society</p>
           <p className="text-4xl font-bold tabular-nums leading-none mt-auto">{rsCount}</p>
         </div>
