@@ -41,10 +41,7 @@ export function SendTab({ orgId, role }: SendTabProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 sm:grid-rows-[1fr_auto] gap-4">
       {/* Active members tile — top on mobile, top-right on sm+ */}
-      <div
-        className="bento-tile-tinted order-1 sm:order-2 sm:col-start-3 sm:row-start-1"
-        style={{ background: 'color-mix(in oklch, var(--color-primary) 18%, transparent)' }}
-      >
+      <div className="bento-tile order-1 sm:order-2 sm:col-start-3 sm:row-start-1">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Active members</p>
         <p className="text-5xl font-bold tabular-nums leading-none mt-auto">
           {stats ?? <span className="text-muted-foreground">—</span>}
@@ -52,10 +49,7 @@ export function SendTab({ orgId, role }: SendTabProps) {
       </div>
 
       {/* Messages sent tile — top on mobile, bottom-right on sm+ */}
-      <div
-        className="bento-tile-tinted order-2 sm:order-3 sm:col-start-3 sm:row-start-2"
-        style={{ background: 'color-mix(in oklch, var(--color-secondary) 18%, transparent)' }}
-      >
+      <div className="bento-tile order-2 sm:order-3 sm:col-start-3 sm:row-start-2">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Messages sent</p>
         <p className="text-xs text-muted-foreground">this month</p>
         <p className="text-5xl font-bold tabular-nums leading-none mt-auto">
