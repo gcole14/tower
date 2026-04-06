@@ -119,55 +119,57 @@ export function MemberTable({ orgId }: MemberTableProps) {
         <Button onClick={() => setAddOpen(true)}>Add member</Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Group</TableHead>
-            <TableHead>Added</TableHead>
-            <TableHead>Opted out</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map((member) => (
-            <TableRow key={member.id}>
-              <TableCell>{member.name}</TableCell>
-              <TableCell className="tabular-nums">{member.phone}</TableCell>
-              <TableCell>
-                {member.group_tag ? (
-                  <Badge variant="secondary">
-                    {member.group_tag === 'elders_quorum' ? "EQ" : "RS"}
-                  </Badge>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell className="tabular-nums text-muted-foreground text-sm">
-                {format(new Date(member.created_at), 'MMM d, yyyy')}
-              </TableCell>
-              <TableCell>
-                <Switch
-                  checked={member.opted_out}
-                  onCheckedChange={(v) =>
-                    optOutMutation.mutate({ id: member.id, opted_out: v })
-                  }
-                />
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditMember(member)}
-                >
-                  Edit
-                </Button>
-              </TableCell>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead className="hidden sm:table-cell">Group</TableHead>
+              <TableHead className="hidden sm:table-cell">Added</TableHead>
+              <TableHead>Opted out</TableHead>
+              <TableHead></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {members.map((member) => (
+              <TableRow key={member.id}>
+                <TableCell>{member.name}</TableCell>
+                <TableCell className="tabular-nums">{member.phone}</TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {member.group_tag ? (
+                    <Badge variant="secondary">
+                      {member.group_tag === 'elders_quorum' ? "EQ" : "RS"}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="hidden sm:table-cell tabular-nums text-muted-foreground text-sm">
+                  {format(new Date(member.created_at), 'MMM d, yyyy')}
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={member.opted_out}
+                    onCheckedChange={(v) =>
+                      optOutMutation.mutate({ id: member.id, opted_out: v })
+                    }
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditMember(member)}
+                  >
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <MemberFormDialog
         open={addOpen}

@@ -28,9 +28,11 @@ const GROUP_TAG_MAP: Record<string, string> = {
   'elders quorum': 'elders_quorum',
   'elders_quorum': 'elders_quorum',
   'eq': 'elders_quorum',
+  'm': 'elders_quorum',
   'relief society': 'relief_society',
   'relief_society': 'relief_society',
   'rs': 'relief_society',
+  'f': 'relief_society',
 }
 
 function parseGroupTag(raw: string): string | null {
@@ -43,6 +45,7 @@ function validateRow(raw: Record<string, string>, index: number): ParsedRow {
   const name = (raw['name'] ?? raw['Name'] ?? '').trim()
   const rawPhone = (raw['phone'] ?? raw['Phone'] ?? raw['phone_number'] ?? raw['Phone Number'] ?? '').trim()
   const rawGroup = (raw['group'] ?? raw['Group'] ?? raw['group_tag'] ?? raw['Group Tag'] ?? '').trim()
+  const rawGender = (raw['gender'] ?? raw['Gender'] ?? raw['sex'] ?? raw['Sex'] ?? '').trim()
 
   if (!name) return { name, phone: rawPhone, group_tag: null, error: `Row ${index + 1}: missing name` }
   if (!rawPhone) return { name, phone: rawPhone, group_tag: null, error: `Row ${index + 1}: missing phone` }
@@ -53,7 +56,7 @@ function validateRow(raw: Record<string, string>, index: number): ParsedRow {
   return {
     name,
     phone: normalizePhone(rawPhone),
-    group_tag: parseGroupTag(rawGroup),
+    group_tag: parseGroupTag(rawGroup) ?? parseGroupTag(rawGender),
     error: null,
   }
 }
@@ -122,7 +125,7 @@ export function MemberImportDialog({ open, onOpenChange, orgId }: MemberImportDi
           {/* Instructions */}
           <div className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground flex flex-col gap-1">
             <p>CSV must include <strong className="text-foreground">name</strong> and <strong className="text-foreground">phone</strong> columns.</p>
-            <p>Optional: <strong className="text-foreground">group</strong> column with values <code className="text-xs bg-muted px-1 py-0.5 rounded">eq</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded">rs</code>, or blank.</p>
+            <p>Optional: <strong className="text-foreground">group</strong> column (<code className="text-xs bg-muted px-1 py-0.5 rounded">eq</code>/<code className="text-xs bg-muted px-1 py-0.5 rounded">rs</code>) or <strong className="text-foreground">gender</strong> column (<code className="text-xs bg-muted px-1 py-0.5 rounded">M</code> → Elders Quorum, <code className="text-xs bg-muted px-1 py-0.5 rounded">F</code> → Relief Society).</p>
           </div>
 
           {/* File picker */}

@@ -56,8 +56,8 @@ export function InvitesTab({ orgId, userId }: InvitesTabProps) {
   })
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="bento-tile col-span-2">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bento-tile sm:col-span-2">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Access</p>
           <h2 className="text-lg font-semibold mt-0.5">Pending invites</h2>

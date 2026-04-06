@@ -36,13 +36,13 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex items-center gap-3">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator orientation="vertical" className="h-4" />
-            <div className="flex items-center gap-2">
-              <img src="/tower-logo.svg" alt="Tower" className="size-5 opacity-80" />
-              <span className="font-semibold text-sm tracking-tight">Tower</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <img src="/tower-logo.svg" alt="Tower" className="size-5 opacity-80 shrink-0" />
+              <span className="font-semibold text-sm tracking-tight shrink-0">Tower</span>
               {profile?.organization?.name && (
                 <>
-                  <span className="text-muted-foreground/40 text-sm">/</span>
-                  <span className="text-sm text-muted-foreground">{profile.organization.name}</span>
+                  <span className="text-muted-foreground/40 text-sm shrink-0">/</span>
+                  <span className="text-sm text-muted-foreground truncate">{profile.organization.name}</span>
                 </>
               )}
             </div>
@@ -63,7 +63,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-4 sm:p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )
