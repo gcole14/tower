@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -39,7 +40,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[--color-surface]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[--color-surface] gap-4">
       <Card className="w-full max-w-sm rounded-xl">
         <CardHeader className="items-center">
           <img src="/tower-logo.svg" alt="Tower" className="size-12 mb-2" />
@@ -76,6 +77,11 @@ export default function Login() {
           )}
         </CardContent>
       </Card>
+      <p className="text-xs text-muted-foreground">
+        <Link to="/opt-in" className="underline underline-offset-4 hover:text-foreground transition-colors">
+          SMS opt-in consent
+        </Link>
+      </p>
     </div>
   )
 }

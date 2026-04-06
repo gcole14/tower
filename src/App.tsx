@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "@/pages/Login";
 import AcceptInvite from "@/pages/AcceptInvite";
+import OptIn from "@/pages/OptIn";
 import Dashboard from "@/pages/dashboard/Dashboard";
 
 const queryClient = new QueryClient();
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/accept-invite" element={<AcceptInvite />} />
+          <Route path="/opt-in" element={<OptIn />} />
           <Route
             path="/*"
             element={
