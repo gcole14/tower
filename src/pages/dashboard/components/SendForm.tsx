@@ -90,7 +90,11 @@ export function SendForm({ orgId, role }: SendFormProps) {
           className="flex flex-wrap gap-2"
         >
           {allowedScopes.map((s) => (
-            <ToggleGroupItem key={s} value={s} className="rounded-lg">
+            <ToggleGroupItem
+              key={s}
+              value={s}
+              className="rounded-lg data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground"
+            >
               {scopeLabels[s]}
             </ToggleGroupItem>
           ))}
