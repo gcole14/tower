@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/lib/database.types'
@@ -18,6 +18,7 @@ const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   phone: z.string().min(7, 'Enter a valid phone number'),
   group_tag: z.enum(['elders_quorum', 'relief_society', 'none']),
+  org_id: z.string().min(1, 'Organization is required'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -31,6 +32,19 @@ interface MemberFormProps {
 export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
   const queryClient = useQueryClient()
 
+  const { data: orgs } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .order('name')
+      if (error) throw error
+      return data
+    },
+    enabled: !member,
+  })
+
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } =
     useForm<FormValues>({
       resolver: zodResolver(schema),
@@ -38,12 +52,14 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
         name: member?.name ?? '',
         phone: member?.phone ?? '',
         group_tag: member?.group_tag ?? 'none',
+        org_id: member?.org_id ?? orgId,
       },
     })
 
   const groupTag = watch('group_tag')
+  const selectedOrgId = watch('org_id')
 
-  const onSubmit = async ({ name, phone, group_tag }: FormValues) => {
+  const onSubmit = async ({ name, phone, group_tag, org_id }: FormValues) => {
     const normalizedPhone = normalizePhone(phone)
     const group = group_tag === 'none' ? null : group_tag
 
@@ -59,7 +75,7 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
       }
     } else {
       const { error } = await supabase.from('members').insert({
-        org_id: orgId,
+        org_id,
         name,
         phone: normalizedPhone,
         group_tag: group,
@@ -76,6 +92,8 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
     onSuccess()
   }
 
+  const showOrgSelector = !member && orgs && orgs.length > 1
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
@@ -89,6 +107,29 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
         <Input id="phone" type="tel" placeholder="(555) 123-4567" {...register('phone')} />
         {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
       </div>
+
+      {showOrgSelector && (
+        <div className="flex flex-col gap-2">
+          <Label>Organization</Label>
+          <Select
+            value={selectedOrgId}
+            onValueChange={(v) => setValue('org_id', v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select organization" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {orgs.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>
+                    {org.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <Label>Group</Label>
