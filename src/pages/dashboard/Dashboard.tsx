@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { hasMinRole } from '@/types'
+import { OverviewTab } from './tabs/OverviewTab'
 import { SendTab } from './tabs/SendTab'
 import { MembersTab } from './tabs/MembersTab'
 import { HistoryTab } from './tabs/HistoryTab'
@@ -15,7 +16,6 @@ export default function Dashboard() {
   if (!profile) return null
 
   const { role, org_id, id: userId } = profile
-  const defaultRoute = hasMinRole(role, 'comms_chair') ? 'send' : 'members'
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
@@ -24,7 +24,7 @@ export default function Dashboard() {
       </h1>
 
       <Routes>
-        <Route index element={<Navigate to={defaultRoute} replace />} />
+        <Route index element={<OverviewTab orgId={org_id} />} />
 
         {hasMinRole(role, 'comms_chair') && (
           <Route path="send" element={<SendTab orgId={org_id} role={role} />} />
@@ -42,7 +42,7 @@ export default function Dashboard() {
           <Route path="orgs" element={<OrgsTab />} />
         )}
 
-        <Route path="*" element={<Navigate to={defaultRoute} replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )
