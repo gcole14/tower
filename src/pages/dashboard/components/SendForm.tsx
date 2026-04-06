@@ -45,6 +45,13 @@ const scopeLabels: Record<Scope, string> = {
   stake_all: 'Stake-wide',
 }
 
+const scopeActiveClass: Record<Scope, string> = {
+  ward:            'data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 data-[state=on]:border-yellow-300',
+  elders_quorum:   'data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground data-[state=on]:border-sidebar-accent',
+  relief_society:  'data-[state=on]:bg-pink-100 data-[state=on]:text-pink-800 data-[state=on]:border-pink-300',
+  stake_all:       'data-[state=on]:bg-red-100 data-[state=on]:text-red-800 data-[state=on]:border-red-300',
+}
+
 function getScopesForRole(role: Role): Scope[] {
   const base: Scope[] = ['ward', 'elders_quorum', 'relief_society']
   if (hasMinRole(role, 'stake_admin')) return [...base, 'stake_all']
@@ -144,7 +151,7 @@ export function SendForm({ orgId, role }: SendFormProps) {
               <ToggleGroupItem
                 key={s}
                 value={s}
-                className="rounded-full border border-border/60 bg-transparent px-4 hover:bg-muted/60 data-[state=on]:border-sidebar-accent data-[state=on]:bg-sidebar-accent data-[state=on]:text-sidebar-accent-foreground"
+                className={`rounded-full border border-border/60 bg-transparent px-4 hover:bg-muted/60 ${scopeActiveClass[s]}`}
               >
                 {scopeLabels[s]}
               </ToggleGroupItem>
