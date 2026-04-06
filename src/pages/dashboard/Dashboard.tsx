@@ -18,8 +18,8 @@ export default function Dashboard() {
   const defaultRoute = hasMinRole(role, 'comms_chair') ? 'send' : 'members'
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">
+    <div className="flex flex-col gap-6 max-w-5xl">
+      <h1 className="text-2xl font-semibold tracking-tight">
         {profile.organization?.name ?? 'Dashboard'}
       </h1>
 

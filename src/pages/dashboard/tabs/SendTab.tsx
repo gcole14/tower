@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Role } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SendForm } from '../components/SendForm'
 
 interface SendTabProps {
@@ -36,31 +35,37 @@ export function SendTab({ orgId, role }: SendTabProps) {
   })
 
   return (
-    <div className="grid grid-cols-3 gap-6">
-      <Card className="col-span-2 rounded-xl">
-        <CardHeader>
-          <CardTitle>Compose message</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SendForm orgId={orgId} role={role} />
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-3 grid-rows-[1fr_auto] gap-4">
+      {/* Compose tile — spans 2 cols, full height */}
+      <div className="bento-tile col-span-2 row-span-2">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Compose</p>
+          <h2 className="text-lg font-semibold mt-0.5">New message</h2>
+        </div>
+        <SendForm orgId={orgId} role={role} />
+      </div>
 
-      <Card className="col-span-1 rounded-xl">
-        <CardHeader>
-          <CardTitle>Stats</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Active members</p>
-            <p className="text-3xl font-semibold tabular-nums">{stats ?? '—'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Messages sent</p>
-            <p className="text-3xl font-semibold tabular-nums">{sentCount ?? '—'}</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Active members tile */}
+      <div
+        className="bento-tile-tinted col-span-1"
+        style={{ background: 'color-mix(in oklch, var(--color-primary) 18%, transparent)' }}
+      >
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Active members</p>
+        <p className="text-5xl font-bold tabular-nums leading-none mt-auto">
+          {stats ?? <span className="text-muted-foreground">—</span>}
+        </p>
+      </div>
+
+      {/* Messages sent tile */}
+      <div
+        className="bento-tile-tinted col-span-1"
+        style={{ background: 'color-mix(in oklch, var(--color-secondary) 18%, transparent)' }}
+      >
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Messages sent</p>
+        <p className="text-5xl font-bold tabular-nums leading-none mt-auto">
+          {sentCount ?? <span className="text-muted-foreground">—</span>}
+        </p>
+      </div>
     </div>
   )
 }

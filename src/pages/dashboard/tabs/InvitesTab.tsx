@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/lib/database.types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -57,12 +56,12 @@ export function InvitesTab({ orgId, userId }: InvitesTabProps) {
   })
 
   return (
-    <div className="grid grid-cols-3 gap-6">
-      <Card className="col-span-2 rounded-xl">
-        <CardHeader>
-          <CardTitle>Pending invites</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="grid grid-cols-3 gap-4">
+      <div className="bento-tile col-span-2">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Access</p>
+          <h2 className="text-lg font-semibold mt-0.5">Pending invites</h2>
+        </div>
           {isLoading ? (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -111,17 +110,15 @@ export function InvitesTab({ orgId, userId }: InvitesTabProps) {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+      </div>
 
-      <Card className="col-span-1 rounded-xl">
-        <CardHeader>
-          <CardTitle>Invite someone</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InviteForm orgId={orgId} invitedBy={userId} />
-        </CardContent>
-      </Card>
+      <div className="bento-tile col-span-1">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Invite</p>
+          <h2 className="text-lg font-semibold mt-0.5">Add someone</h2>
+        </div>
+        <InviteForm orgId={orgId} invitedBy={userId} />
+      </div>
     </div>
   )
 }

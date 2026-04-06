@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,16 +32,26 @@ export function AppLayout({ children }: AppLayoutProps) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex items-center justify-between h-14 px-4 border-b">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger />
-            <span className="font-semibold text-lg">Tower</span>
+        <header className="flex items-center justify-between h-14 px-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+            <Separator orientation="vertical" className="h-4" />
+            <div className="flex items-center gap-2">
+              <img src="/tower-logo.svg" alt="Tower" className="size-5 opacity-80" />
+              <span className="font-semibold text-sm tracking-tight">Tower</span>
+              {profile?.organization?.name && (
+                <>
+                  <span className="text-muted-foreground/40 text-sm">/</span>
+                  <span className="text-sm text-muted-foreground">{profile.organization.name}</span>
+                </>
+              )}
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar className="size-8">
-                  <AvatarFallback>{initials}</AvatarFallback>
+                  <AvatarFallback className="text-xs bg-primary/10 text-primary-foreground/80">{initials}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
