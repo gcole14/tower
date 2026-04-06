@@ -1,13 +1,14 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Toaster } from 'sonner'
-import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
-import { AppLayout } from '@/components/layout/AppLayout'
-import Login from '@/pages/Login'
-import AcceptInvite from '@/pages/AcceptInvite'
-import Dashboard from '@/pages/dashboard/Dashboard'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { AppLayout } from "@/components/layout/AppLayout";
+import Login from "@/pages/Login";
+import AcceptInvite from "@/pages/AcceptInvite";
+import Dashboard from "@/pages/dashboard/Dashboard";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         </Routes>
       </BrowserRouter>
       <Toaster position="bottom-right" richColors />
+      <Analytics />
     </QueryClientProvider>
-  )
+  );
 }
