@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { MemberForm } from './MemberForm'
+import { MemberImportDialog } from './MemberImportDialog'
 
 type Member = Database['public']['Tables']['members']['Row']
 
@@ -39,6 +40,7 @@ export function MemberTable({ orgId }: MemberTableProps) {
   const queryClient = useQueryClient()
   const [editMember, setEditMember] = useState<Member | null>(null)
   const [addOpen, setAddOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   const { data: members, isLoading } = useQuery({
     queryKey: ['members', orgId],
@@ -95,20 +97,25 @@ export function MemberTable({ orgId }: MemberTableProps) {
           <EmptyTitle>No members yet</EmptyTitle>
           <EmptyDescription>Add your first member to get started.</EmptyDescription>
         </EmptyHeader>
-        <Button onClick={() => setAddOpen(true)}>Add member</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>Import CSV</Button>
+          <Button onClick={() => setAddOpen(true)}>Add member</Button>
+        </div>
         <MemberFormDialog
           open={addOpen}
           onOpenChange={setAddOpen}
           orgId={orgId}
           member={null}
         />
+        <MemberImportDialog open={importOpen} onOpenChange={setImportOpen} orgId={orgId} />
       </Empty>
     )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={() => setImportOpen(true)}>Import CSV</Button>
         <Button onClick={() => setAddOpen(true)}>Add member</Button>
       </div>
 
@@ -175,6 +182,8 @@ export function MemberTable({ orgId }: MemberTableProps) {
         orgId={orgId}
         member={editMember}
       />
+
+      <MemberImportDialog open={importOpen} onOpenChange={setImportOpen} orgId={orgId} />
     </div>
   )
 }
