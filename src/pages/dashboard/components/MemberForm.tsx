@@ -143,7 +143,7 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
           <SelectContent>
             <SelectGroup>
               <SelectItem value="none">None</SelectItem>
-              <SelectItem value="elders_quorum">Elders' Quorum</SelectItem>
+              <SelectItem value="elders_quorum">Elders Quorum</SelectItem>
               <SelectItem value="relief_society">Relief Society</SelectItem>
             </SelectGroup>
           </SelectContent>

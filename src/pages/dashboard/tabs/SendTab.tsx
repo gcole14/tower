@@ -25,10 +25,14 @@ export function SendTab({ orgId, role }: SendTabProps) {
   const { data: sentCount } = useQuery({
     queryKey: ['messages-count', orgId],
     queryFn: async () => {
+      const start = new Date()
+      start.setDate(1)
+      start.setHours(0, 0, 0, 0)
       const { count, error } = await supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('org_id', orgId)
+        .gte('created_at', start.toISOString())
       if (error) throw error
       return count ?? 0
     },
@@ -53,9 +57,10 @@ export function SendTab({ orgId, role }: SendTabProps) {
         style={{ background: 'color-mix(in oklch, var(--color-secondary) 18%, transparent)' }}
       >
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Messages sent</p>
-        <p className="text-5xl font-bold tabular-nums leading-none mt-auto">
+        <p className="text-5xl font-bold tabular-nums leading-none mt-auto pt-1">
           {sentCount ?? <span className="text-muted-foreground">—</span>}
         </p>
+        <p className="text-xs text-muted-foreground">this month</p>
       </div>
 
       {/* Compose tile — full width on mobile, spans 2 cols + 2 rows on sm+ */}

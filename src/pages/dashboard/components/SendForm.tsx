@@ -40,7 +40,7 @@ interface SendFormProps {
 
 const scopeLabels: Record<Scope, string> = {
   ward: 'Ward',
-  elders_quorum: "Elders' Quorum",
+  elders_quorum: "Elders Quorum",
   relief_society: 'Relief Society',
   stake_all: 'Stake-wide',
 }
