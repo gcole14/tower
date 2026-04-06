@@ -137,6 +137,7 @@ export function SendForm({ orgId, role }: SendFormProps) {
             type="single"
             value={scope}
             onValueChange={(v) => v && setScope(v as Scope)}
+            spacing={2}
             className="flex flex-wrap gap-2"
           >
             {allowedScopes.map((s) => (
