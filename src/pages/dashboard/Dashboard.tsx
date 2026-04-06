@@ -1,7 +1,7 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { hasMinRole } from '@/types'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SendTab } from './tabs/SendTab'
 import { MembersTab } from './tabs/MembersTab'
 import { HistoryTab } from './tabs/HistoryTab'
@@ -15,6 +15,7 @@ export default function Dashboard() {
   if (!profile) return null
 
   const { role, org_id, id: userId } = profile
+  const defaultRoute = hasMinRole(role, 'comms_chair') ? 'send' : 'members'
 
   return (
     <div className="flex flex-col gap-6">
@@ -22,51 +23,27 @@ export default function Dashboard() {
         {profile.organization?.name ?? 'Dashboard'}
       </h1>
 
-      <Tabs defaultValue="send">
-        <TabsList>
-          {hasMinRole(role, 'comms_chair') && (
-            <TabsTrigger value="send">Send</TabsTrigger>
-          )}
-          {hasMinRole(role, 'ward_admin') && (
-            <TabsTrigger value="members">Members</TabsTrigger>
-          )}
-          {hasMinRole(role, 'comms_chair') && (
-            <TabsTrigger value="history">History</TabsTrigger>
-          )}
-          {hasMinRole(role, 'ward_admin') && (
-            <TabsTrigger value="invites">Invites</TabsTrigger>
-          )}
-          {hasMinRole(role, 'super_admin') && (
-            <TabsTrigger value="orgs">Orgs</TabsTrigger>
-          )}
-        </TabsList>
+      <Routes>
+        <Route index element={<Navigate to={defaultRoute} replace />} />
 
         {hasMinRole(role, 'comms_chair') && (
-          <TabsContent value="send" className="mt-6">
-            <SendTab orgId={org_id} role={role} />
-          </TabsContent>
+          <Route path="send" element={<SendTab orgId={org_id} role={role} />} />
         )}
         {hasMinRole(role, 'ward_admin') && (
-          <TabsContent value="members" className="mt-6">
-            <MembersTab orgId={org_id} />
-          </TabsContent>
+          <Route path="members" element={<MembersTab orgId={org_id} />} />
         )}
         {hasMinRole(role, 'comms_chair') && (
-          <TabsContent value="history" className="mt-6">
-            <HistoryTab orgId={org_id} />
-          </TabsContent>
+          <Route path="history" element={<HistoryTab orgId={org_id} />} />
         )}
         {hasMinRole(role, 'ward_admin') && (
-          <TabsContent value="invites" className="mt-6">
-            <InvitesTab orgId={org_id} userId={userId} />
-          </TabsContent>
+          <Route path="invites" element={<InvitesTab orgId={org_id} userId={userId} />} />
         )}
         {hasMinRole(role, 'super_admin') && (
-          <TabsContent value="orgs" className="mt-6">
-            <OrgsTab />
-          </TabsContent>
+          <Route path="orgs" element={<OrgsTab />} />
         )}
-      </Tabs>
+
+        <Route path="*" element={<Navigate to={defaultRoute} replace />} />
+      </Routes>
     </div>
   )
 }
