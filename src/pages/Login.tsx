@@ -42,7 +42,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[--color-surface]">
       <Card className="w-full max-w-sm rounded-xl">
         <CardHeader className="items-center">
-          <img src="/Tower SVG.svg" alt="Tower" className="size-12 mb-2" />
+          <img src="/tower-logo.svg" alt="Tower" className="size-12 mb-2" />
           <CardTitle>Sign in to Tower</CardTitle>
           <CardDescription>We'll send a magic link to your email.</CardDescription>
         </CardHeader>
