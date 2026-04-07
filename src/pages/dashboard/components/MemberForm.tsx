@@ -19,6 +19,7 @@ const schema = z.object({
   phone: z.string().min(7, 'Enter a valid phone number'),
   group_tag: z.enum(['elders_quorum', 'relief_society', 'none']),
   org_id: z.string().min(1, 'Organization is required'),
+  birthday: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -53,20 +54,22 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
         phone: member?.phone ?? '',
         group_tag: member?.group_tag ?? 'none',
         org_id: member?.org_id ?? orgId,
+        birthday: member?.birthday ?? '',
       },
     })
 
   const groupTag = watch('group_tag')
   const selectedOrgId = watch('org_id')
 
-  const onSubmit = async ({ name, phone, group_tag, org_id }: FormValues) => {
+  const onSubmit = async ({ name, phone, group_tag, org_id, birthday }: FormValues) => {
     const normalizedPhone = normalizePhone(phone)
     const group = group_tag === 'none' ? null : group_tag
+    const birthdayVal = birthday?.trim() || null
 
     if (member) {
       const { error } = await supabase
         .from('members')
-        .update({ name, phone: normalizedPhone, group_tag: group })
+        .update({ name, phone: normalizedPhone, group_tag: group, birthday: birthdayVal })
         .eq('id', member.id)
 
       if (error) {
@@ -79,6 +82,7 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
         name,
         phone: normalizedPhone,
         group_tag: group,
+        birthday: birthdayVal,
       })
 
       if (error) {
@@ -148,6 +152,11 @@ export function MemberForm({ orgId, member, onSuccess }: MemberFormProps) {
             </SelectGroup>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="birthday">Birthday <span className="text-muted-foreground font-normal">(optional)</span></Label>
+        <Input id="birthday" type="date" {...register('birthday')} />
       </div>
 
       <Button type="submit" disabled={isSubmitting}>

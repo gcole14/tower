@@ -109,6 +109,7 @@ export type Database = {
           phone: string
           group_tag: 'elders_quorum' | 'relief_society' | null
           opted_out: boolean
+          birthday: string | null
           created_at: string
         }
         Insert: {
@@ -118,6 +119,7 @@ export type Database = {
           phone: string
           group_tag?: 'elders_quorum' | 'relief_society' | null
           opted_out?: boolean
+          birthday?: string | null
           created_at?: string
         }
         Update: {
@@ -127,6 +129,7 @@ export type Database = {
           phone?: string
           group_tag?: 'elders_quorum' | 'relief_society' | null
           opted_out?: boolean
+          birthday?: string | null
           created_at?: string
         }
         Relationships: []

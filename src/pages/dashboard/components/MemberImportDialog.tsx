@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import Papa from 'papaparse'
+import { parse as parseDate, isValid } from 'date-fns'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
@@ -21,6 +22,7 @@ interface ParsedRow {
   name: string
   phone: string
   group_tag: string | null
+  birthday: string | null
   error: string | null
 }
 
@@ -35,10 +37,33 @@ const GROUP_TAG_MAP: Record<string, string> = {
   'f': 'relief_society',
 }
 
+const BIRTHDAY_FORMATS = [
+  'MM/dd/yyyy',
+  'M/d/yyyy',
+  'MM-dd-yyyy',
+  'yyyy-MM-dd',
+  'dd/MM/yyyy',
+  'MMMM d, yyyy',
+  'MMM d, yyyy',
+]
+
 function parseGroupTag(raw: string): string | null {
   if (!raw) return null
   const normalized = raw.trim().toLowerCase()
   return GROUP_TAG_MAP[normalized] ?? null
+}
+
+function parseBirthday(raw: string): string | null {
+  if (!raw) return null
+  const trimmed = raw.trim()
+  const ref = new Date(2000, 0, 1)
+  for (const fmt of BIRTHDAY_FORMATS) {
+    const d = parseDate(trimmed, fmt, ref)
+    if (isValid(d) && d.getFullYear() > 1900) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+  }
+  return null
 }
 
 function validateRow(raw: Record<string, string>, index: number): ParsedRow {
@@ -46,17 +71,25 @@ function validateRow(raw: Record<string, string>, index: number): ParsedRow {
   const rawPhone = (raw['phone'] ?? raw['Phone'] ?? raw['phone_number'] ?? raw['Phone Number'] ?? '').trim()
   const rawGroup = (raw['group'] ?? raw['Group'] ?? raw['group_tag'] ?? raw['Group Tag'] ?? '').trim()
   const rawGender = (raw['gender'] ?? raw['Gender'] ?? raw['sex'] ?? raw['Sex'] ?? '').trim()
+  const rawBirthday = (
+    raw['birthday'] ?? raw['Birthday'] ??
+    raw['birth_date'] ?? raw['Birth Date'] ??
+    raw['dob'] ?? raw['DOB'] ??
+    raw['birthdate'] ?? raw['Birthdate'] ??
+    raw['date_of_birth'] ?? raw['Date of Birth'] ?? ''
+  ).trim()
 
-  if (!name) return { name, phone: rawPhone, group_tag: null, error: `Row ${index + 1}: missing name` }
-  if (!rawPhone) return { name, phone: rawPhone, group_tag: null, error: `Row ${index + 1}: missing phone` }
+  if (!name) return { name, phone: rawPhone, group_tag: null, birthday: null, error: `Row ${index + 1}: missing name` }
+  if (!rawPhone) return { name, phone: rawPhone, group_tag: null, birthday: null, error: `Row ${index + 1}: missing phone` }
 
   const digits = rawPhone.replace(/\D/g, '')
-  if (digits.length < 7) return { name, phone: rawPhone, group_tag: null, error: `Row ${index + 1}: invalid phone` }
+  if (digits.length < 7) return { name, phone: rawPhone, group_tag: null, birthday: null, error: `Row ${index + 1}: invalid phone` }
 
   return {
     name,
     phone: normalizePhone(rawPhone),
     group_tag: parseGroupTag(rawGroup) ?? parseGroupTag(rawGender),
+    birthday: parseBirthday(rawBirthday),
     error: null,
   }
 }
@@ -88,11 +121,12 @@ export function MemberImportDialog({ open, onOpenChange, orgId }: MemberImportDi
     setImporting(true)
 
     const { error } = await supabase.from('members').insert(
-      validRows.map(({ name, phone, group_tag }) => ({
+      validRows.map(({ name, phone, group_tag, birthday }) => ({
         org_id: orgId,
         name,
         phone,
         group_tag: group_tag as 'elders_quorum' | 'relief_society' | null,
+        birthday: birthday ?? null,
       }))
     )
 
@@ -125,7 +159,7 @@ export function MemberImportDialog({ open, onOpenChange, orgId }: MemberImportDi
           {/* Instructions */}
           <div className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground flex flex-col gap-1">
             <p>CSV must include <strong className="text-foreground">name</strong> and <strong className="text-foreground">phone</strong> columns.</p>
-            <p>Optional: <strong className="text-foreground">group</strong> column (<code className="text-xs bg-muted px-1 py-0.5 rounded">eq</code>/<code className="text-xs bg-muted px-1 py-0.5 rounded">rs</code>) or <strong className="text-foreground">gender</strong> column (<code className="text-xs bg-muted px-1 py-0.5 rounded">M</code> → Elders Quorum, <code className="text-xs bg-muted px-1 py-0.5 rounded">F</code> → Relief Society).</p>
+            <p>Optional: <strong className="text-foreground">gender</strong> (<code className="text-xs bg-muted px-1 py-0.5 rounded">M</code>/<code className="text-xs bg-muted px-1 py-0.5 rounded">F</code>) or <strong className="text-foreground">group</strong> (<code className="text-xs bg-muted px-1 py-0.5 rounded">eq</code>/<code className="text-xs bg-muted px-1 py-0.5 rounded">rs</code>), and <strong className="text-foreground">birthday</strong> (<code className="text-xs bg-muted px-1 py-0.5 rounded">MM/DD/YYYY</code>).</p>
           </div>
 
           {/* File picker */}
@@ -154,6 +188,7 @@ export function MemberImportDialog({ open, onOpenChange, orgId }: MemberImportDi
                       <TableHead>Name</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Group</TableHead>
+                      <TableHead>Birthday</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -163,6 +198,9 @@ export function MemberImportDialog({ open, onOpenChange, orgId }: MemberImportDi
                         <TableCell>{row.name || <span className="text-muted-foreground italic">missing</span>}</TableCell>
                         <TableCell className="tabular-nums">{row.phone || <span className="text-muted-foreground italic">missing</span>}</TableCell>
                         <TableCell>{row.group_tag?.replace('_', ' ') ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="tabular-nums text-sm">
+                          {row.birthday ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
                         <TableCell>
                           {row.error && (
                             <span className="text-xs text-destructive">{row.error.split(': ')[1]}</span>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/lib/database.types'
 import {
@@ -18,6 +19,11 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { MemberForm } from './MemberForm'
 import { MemberImportDialog } from './MemberImportDialog'
 
@@ -36,6 +42,15 @@ function normalizePhone(phone: string): string {
 
 export { normalizePhone }
 
+function computeAge(birthday: string): number {
+  const today = new Date()
+  const dob = new Date(birthday)
+  let age = today.getFullYear() - dob.getFullYear()
+  const m = today.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+  return age
+}
+
 export function MemberTable({ orgId }: MemberTableProps) {
   const queryClient = useQueryClient()
   const [editMember, setEditMember] = useState<Member | null>(null)
@@ -53,6 +68,22 @@ export function MemberTable({ orgId }: MemberTableProps) {
       if (error) throw error
       return data as Member[]
     },
+  })
+
+  const agedOutMembers = members?.filter(
+    (m) => m.birthday && computeAge(m.birthday) >= 35
+  ) ?? []
+
+  const removeAgedOutMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from('members').delete().in('id', ids)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members', orgId] })
+      toast.success(`Removed ${agedOutMembers.length} aged-out member${agedOutMembers.length !== 1 ? 's' : ''}`)
+    },
+    onError: () => toast.error('Failed to remove members'),
   })
 
   const optOutMutation = useMutation({
@@ -119,6 +150,41 @@ export function MemberTable({ orgId }: MemberTableProps) {
         <Button onClick={() => setAddOpen(true)}>Add member</Button>
       </div>
 
+      {agedOutMembers.length > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
+          <div className="flex items-center gap-2 text-amber-800">
+            <AlertTriangle className="size-4 shrink-0" />
+            <span>
+              <strong>{agedOutMembers.length} member{agedOutMembers.length !== 1 ? 's have' : ' has'} reached age 35</strong> and should be removed from this list.
+            </span>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="shrink-0">
+                Remove {agedOutMembers.length === 1 ? 'them' : `all ${agedOutMembers.length}`}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remove aged-out members?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete {agedOutMembers.length === 1 ? `${agedOutMembers[0].name}` : `${agedOutMembers.length} members`} who {agedOutMembers.length === 1 ? 'has' : 'have'} reached age 35. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => removeAgedOutMutation.mutate(agedOutMembers.map((m) => m.id))}
+                >
+                  Remove
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -134,7 +200,16 @@ export function MemberTable({ orgId }: MemberTableProps) {
           <TableBody>
             {members.map((member) => (
               <TableRow key={member.id}>
-                <TableCell>{member.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {member.name}
+                    {member.birthday && computeAge(member.birthday) >= 35 && (
+                      <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50 text-xs">
+                        Age {computeAge(member.birthday)}
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="tabular-nums">{member.phone}</TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {member.group_tag ? (
