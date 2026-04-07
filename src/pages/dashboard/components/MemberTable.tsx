@@ -106,10 +106,11 @@ export function MemberTable({ orgId }: MemberTableProps) {
 
     const q = search.trim().toLowerCase()
     if (q) {
+      const phoneQ = q.replace(/\D/g, '')
       list = list.filter(
         (m) =>
           m.name.toLowerCase().includes(q) ||
-          m.phone.replace(/\D/g, '').includes(q.replace(/\D/g, ''))
+          (phoneQ.length > 0 && m.phone.replace(/\D/g, '').includes(phoneQ))
       )
     }
 
