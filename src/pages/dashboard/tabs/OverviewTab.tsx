@@ -254,7 +254,7 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
                 color: 'hsl(var(--popover-foreground))',
               }}
               cursor={{ stroke: 'hsl(var(--border))' }}
-              formatter={(value: number) => [value, 'Messages']}
+              formatter={(value) => [value ?? 0, 'Messages']}
             />
             <Line
               type="monotone"
