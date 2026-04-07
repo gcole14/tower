@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -99,9 +99,9 @@ export function MemberTable({ orgId }: MemberTableProps) {
     (m) => m.birthday && computeAge(m.birthday) >= 35
   ) ?? []
 
-  // Filtered + sorted view
-  const filteredMembers = useMemo(() => {
-    if (!members) return []
+  // Filtered + sorted view — computed inline so search state is always fresh
+  let filteredMembers: Member[] = []
+  if (members) {
     let list = [...members]
 
     const q = search.trim().toLowerCase()
@@ -134,8 +134,8 @@ export function MemberTable({ orgId }: MemberTableProps) {
       return sortDir === 'asc' ? cmp : -cmp
     })
 
-    return list
-  }, [members, search, groupFilter, optOutFilter, sortField, sortDir])
+    filteredMembers = list
+  }
 
   function toggleSort(field: SortField) {
     if (sortField === field) {
