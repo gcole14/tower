@@ -2,6 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { TrendingUp, TrendingDown, Minus, Send, History } from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +25,8 @@ const scopeLabels: Record<string, string> = {
   relief_society: 'Relief Society',
   stake_all: 'Stake-wide',
 }
+
+const MONTH_ABBREVS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 interface OverviewTabProps {
   orgId: string
@@ -46,6 +57,22 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
         .select('created_at')
         .eq('org_id', orgId)
         .gte('created_at', lastMonthStart.toISOString())
+      if (error) throw error
+      return data
+    },
+  })
+
+  // Messages over the past 12 months for the line chart
+  const { data: yearMessages, isLoading: yearLoading } = useQuery({
+    queryKey: ['messages-year', orgId],
+    queryFn: async () => {
+      const now = new Date()
+      const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1)
+      const { data, error } = await supabase
+        .from('messages')
+        .select('created_at')
+        .eq('org_id', orgId)
+        .gte('created_at', yearAgo.toISOString())
       if (error) throw error
       return data
     },
@@ -89,7 +116,22 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
 
   const trendDelta = thisMonthCount - lastMonthSamePeriodCount
 
-  const isLoading = membersLoading || messagesLoading || lastLoading
+  // Build 12-month chart data
+  const chartData = (() => {
+    const months: { month: string; messages: number }[] = []
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const label = `${MONTH_ABBREVS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`
+      const count = yearMessages?.filter((m) => {
+        const md = new Date(m.created_at)
+        return md.getFullYear() === d.getFullYear() && md.getMonth() === d.getMonth()
+      }).length ?? 0
+      months.push({ month: label, messages: count })
+    }
+    return months
+  })()
+
+  const isLoading = membersLoading || messagesLoading || lastLoading || yearLoading
 
   if (isLoading) {
     return (
@@ -103,6 +145,7 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
           <Skeleton className="h-36 rounded-2xl sm:col-span-2" />
           <Skeleton className="h-36 rounded-2xl" />
         </div>
+        <Skeleton className="h-56 rounded-2xl" />
       </div>
     )
   }
@@ -181,6 +224,48 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
             <p className="text-sm text-muted-foreground mt-auto">No messages sent yet.</p>
           )}
         </div>
+      </div>
+
+      {/* Message volume chart */}
+      <div className="bento-tile">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Message volume</p>
+        <p className="text-sm text-muted-foreground mt-0.5 mb-4">Messages sent per month over the past year</p>
+        <ResponsiveContainer width="100%" height={180}>
+          <LineChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                background: 'hsl(var(--popover))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '0.5rem',
+                fontSize: 12,
+                color: 'hsl(var(--popover-foreground))',
+              }}
+              cursor={{ stroke: 'hsl(var(--border))' }}
+              formatter={(value: number) => [value, 'Messages']}
+            />
+            <Line
+              type="monotone"
+              dataKey="messages"
+              stroke="hsl(var(--primary))"
+              strokeWidth={2}
+              dot={{ r: 3, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
+              activeDot={{ r: 5, strokeWidth: 0 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Quick actions */}
