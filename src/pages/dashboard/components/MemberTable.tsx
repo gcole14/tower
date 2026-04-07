@@ -213,8 +213,13 @@ export function MemberTable({ orgId }: MemberTableProps) {
                 <TableCell className="tabular-nums">{member.phone}</TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {member.group_tag ? (
-                    <Badge variant="secondary">
-                      {member.group_tag === 'elders_quorum' ? "EQ" : "RS"}
+                    <Badge
+                      variant="outline"
+                      className={member.group_tag === 'elders_quorum'
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-accent'
+                        : 'bg-pink-100 text-pink-800 border-pink-300'}
+                    >
+                      {member.group_tag === 'elders_quorum' ? 'EQ' : 'RS'}
                     </Badge>
                   ) : (
                     <span className="text-muted-foreground">—</span>
