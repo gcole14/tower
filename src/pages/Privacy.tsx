@@ -30,6 +30,22 @@ export default function Privacy() {
         </section>
 
         <section className="flex flex-col gap-2">
+          <h2 className="font-medium text-lg">How members opt in</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Members are added to Tower only after a ward or congregation administrator has
+            obtained their verbal or written consent. The verbatim verbal consent script that
+            administrators read is published on our{' '}
+            <Link
+              to="/opt-in"
+              className="underline underline-offset-4 hover:text-foreground transition-colors"
+            >
+              SMS Opt-In Consent page
+            </Link>
+            . Members are never added without prior knowledge and explicit agreement.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
           <h2 className="font-medium text-lg">Information we collect</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             We collect the following information, provided by a ward or congregation administrator

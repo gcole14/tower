@@ -26,6 +26,34 @@ export default function OptIn() {
         </section>
 
         <section className="flex flex-col gap-2">
+          <h2 className="font-medium">Verbal consent script</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Congregation administrators read the following script verbatim when collecting verbal
+            consent from a member before adding their phone number to Tower:
+          </p>
+          <blockquote
+            className="text-sm leading-relaxed rounded-2xl p-5 border whitespace-pre-line"
+            style={{
+              background: 'color-mix(in oklch, white 92%, var(--color-primary) 8%)',
+              borderColor: 'oklch(0 0 0 / 0.06)',
+            }}
+          >
+            {`"Hi, this is [administrator name] from [congregation name]. We use a tool called Tower to send occasional SMS text messages to members of our congregation — things like meeting reminders, announcements, and other congregation-related information.
+
+If you opt in, you'll receive fewer than four messages per month on average. Message and data rates may apply, depending on your wireless plan. You can reply STOP at any time to opt out, or reply HELP for help.
+
+Your phone number will only be used to send these congregation messages, and will not be shared with any third party for marketing purposes.
+
+Do I have your permission to add your phone number — [recite the number back] — to receive these text messages?"`}
+          </blockquote>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            The administrator records the member's affirmative response (date, time, and the name
+            of the administrator who collected consent) before adding the number. If the member
+            declines, the number is not added.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
           <h2 className="font-medium">Message frequency</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Message frequency varies. Most congregations send fewer than 4 messages per month.
