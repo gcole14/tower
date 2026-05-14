@@ -1,7 +1,8 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
+import Landing from '@/pages/Landing'
 
 function AppShellSkeleton() {
   return (
@@ -28,12 +29,14 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth()
   const { data: profile, isLoading: profileLoading } = useProfile(user)
+  const location = useLocation()
 
   if (authLoading || (user && profileLoading)) {
     return <AppShellSkeleton />
   }
 
   if (!user) {
+    if (location.pathname === '/') return <Landing />
     return <Navigate to="/login" replace />
   }
 
