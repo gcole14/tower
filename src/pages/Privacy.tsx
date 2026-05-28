@@ -16,7 +16,7 @@ export default function Privacy() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Privacy Policy</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Tower — Church Communication Tool. Last updated May 13, 2026.
+            Tower — Church Communication Tool. Last updated May 28, 2026.
           </p>
         </div>
 
@@ -41,7 +41,9 @@ export default function Privacy() {
             >
               SMS Opt-In Consent page
             </Link>
-            . Members are never added without prior knowledge and explicit agreement.
+            . SMS consent is separate from all other agreements and is not required to use Tower,
+            participate in church activities, or receive church services. Members are never added
+            without prior knowledge and explicit agreement.
           </p>
         </section>
 

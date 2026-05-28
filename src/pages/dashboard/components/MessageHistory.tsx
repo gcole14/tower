@@ -47,6 +47,7 @@ export function MessageHistory({ orgId }: MessageHistoryProps) {
         .from('messages')
         .select('*')
         .eq('org_id', orgId)
+        .in('status', ['sent', 'failed', 'sending'])
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Message[]

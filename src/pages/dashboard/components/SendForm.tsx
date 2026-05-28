@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,9 +11,11 @@ import { hasMinRole } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Progress } from '@/components/ui/progress'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +28,8 @@ import {
 } from '@/components/ui/alert-dialog'
 
 const SMS_LIMIT = 160
+
+type SendMode = 'now' | 'schedule'
 
 const schema = z.object({
   body: z.string().min(1, 'Message is required').max(1600, 'Message too long'),
@@ -58,8 +62,30 @@ function getScopesForRole(role: Role): Scope[] {
   return base
 }
 
+// Build a default datetime-local value 1 hour from now, in local TZ.
+function defaultScheduledLocal(): string {
+  const d = new Date(Date.now() + 60 * 60 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function formatScheduledDisplay(localDatetime: string): string {
+  const d = new Date(localDatetime)
+  return d.toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
 export function SendForm({ orgId, role }: SendFormProps) {
+  const queryClient = useQueryClient()
   const [scope, setScope] = useState<Scope>('ward')
+  const [mode, setMode] = useState<SendMode>('now')
+  const [scheduledAt, setScheduledAt] = useState<string>(defaultScheduledLocal())
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -98,36 +124,69 @@ export function SendForm({ orgId, role }: SendFormProps) {
   const segments = Math.ceil(charCount / SMS_LIMIT) || 1
   const allowedScopes = getScopesForRole(role)
 
-  // Step 1: form submit → open confirm dialog
+  // Step 1: form submit → validate schedule + open confirm dialog
   const onSubmit = ({ body }: FormValues) => {
+    if (mode === 'schedule') {
+      if (!scheduledAt) {
+        setScheduleError('Pick a date and time')
+        return
+      }
+      const when = new Date(scheduledAt).getTime()
+      if (Number.isNaN(when)) {
+        setScheduleError('Invalid date')
+        return
+      }
+      if (when <= Date.now() + 30_000) {
+        setScheduleError('Scheduled time must be at least 30 seconds in the future')
+        return
+      }
+      setScheduleError(null)
+    }
     setPendingBody(body)
   }
 
-  // Step 2: confirmed → actually send
+  // Step 2: confirmed → actually send or schedule
   const handleConfirmedSend = async () => {
     if (!pendingBody) return
-    const body = pendingBody
+    const messageBody = pendingBody
     setPendingBody(null)
     setSending(true)
-    if (scope === 'stake_all') setProgress(10)
+    if (scope === 'stake_all' && mode === 'now') setProgress(10)
 
     try {
-      const endpoint = scope === 'stake_all' ? 'send-stake-blast' : 'send-sms'
-      const { error } = await supabase.functions.invoke(endpoint, {
-        body: { body, scope, org_id: orgId },
-      })
-
-      if (scope === 'stake_all') setProgress(100)
-
-      if (error) {
-        toast.error(error.message)
-        return
+      if (mode === 'schedule') {
+        const { data: { user } } = await supabase.auth.getUser()
+        const { error } = await supabase.from('messages').insert({
+          org_id: orgId,
+          sent_by: user?.id ?? null,
+          body: messageBody,
+          scope,
+          status: 'scheduled',
+          scheduled_at: new Date(scheduledAt).toISOString(),
+          recipient_count: 0,
+        })
+        if (error) {
+          toast.error(error.message)
+          return
+        }
+        toast.success(`Scheduled for ${formatScheduledDisplay(scheduledAt)}`)
+        queryClient.invalidateQueries({ queryKey: ['scheduled-messages', orgId] })
+        reset()
+      } else {
+        const endpoint = scope === 'stake_all' ? 'send-stake-blast' : 'send-sms'
+        const { error } = await supabase.functions.invoke(endpoint, {
+          body: { body: messageBody, scope, org_id: orgId },
+        })
+        if (scope === 'stake_all') setProgress(100)
+        if (error) {
+          toast.error(error.message)
+          return
+        }
+        setSent(true)
+        reset()
+        setProgress(0)
+        setTimeout(() => setSent(false), 2500)
       }
-
-      setSent(true)
-      reset()
-      setProgress(0)
-      setTimeout(() => setSent(false), 2500)
     } finally {
       setSending(false)
     }
@@ -175,7 +234,32 @@ export function SendForm({ orgId, role }: SendFormProps) {
           </div>
         </div>
 
-        {scope === 'stake_all' && sending && (
+        <div className="flex flex-col gap-2">
+          <Label>When</Label>
+          <Tabs value={mode} onValueChange={(v) => setMode(v as SendMode)}>
+            <TabsList>
+              <TabsTrigger value="now">Send now</TabsTrigger>
+              <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {mode === 'schedule' && (
+            <div className="flex flex-col gap-1">
+              <Input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(e) => {
+                  setScheduledAt(e.target.value)
+                  setScheduleError(null)
+                }}
+              />
+              {scheduleError && (
+                <span className="text-xs text-destructive">{scheduleError}</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {scope === 'stake_all' && sending && mode === 'now' && (
           <Progress value={progress} className="h-2" />
         )}
 
@@ -189,24 +273,31 @@ export function SendForm({ orgId, role }: SendFormProps) {
           ) : sent ? (
             <Check data-icon="inline-start" className="size-4" />
           ) : null}
-          {sent ? 'Sent!' : 'Send message'}
+          {sent ? 'Sent!' : mode === 'schedule' ? 'Schedule message' : 'Send message'}
         </Button>
       </form>
 
       <AlertDialog open={pendingBody !== null} onOpenChange={(open) => !open && setPendingBody(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Send this message?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {mode === 'schedule' ? 'Schedule this message?' : 'Send this message?'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {count !== null
-                ? <>This will send an SMS to <strong className="text-foreground">{count} {count === 1 ? 'person' : 'people'}</strong> in {scopeLabels[scope]}.</>
-                : <>This will send an SMS to all active members across every ward in the stake.</>
-              }
+              {mode === 'schedule' ? (
+                <>This will be sent on <strong className="text-foreground">{formatScheduledDisplay(scheduledAt)}</strong> to {count !== null ? <>{count} {count === 1 ? 'person' : 'people'} in {scopeLabels[scope]}</> : 'all active members across every ward in the stake'}.</>
+              ) : count !== null ? (
+                <>This will send an SMS to <strong className="text-foreground">{count} {count === 1 ? 'person' : 'people'}</strong> in {scopeLabels[scope]}.</>
+              ) : (
+                <>This will send an SMS to all active members across every ward in the stake.</>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmedSend}>Send</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmedSend}>
+              {mode === 'schedule' ? 'Schedule' : 'Send'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

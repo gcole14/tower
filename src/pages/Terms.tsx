@@ -16,7 +16,7 @@ export default function Terms() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Terms and Conditions</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Tower — Church Communication Tool. Last updated May 13, 2026.
+            Tower — Church Communication Tool. Last updated May 28, 2026.
           </p>
         </div>
 
@@ -40,9 +40,18 @@ export default function Terms() {
         <section className="flex flex-col gap-2">
           <h2 className="font-medium text-lg">SMS messaging program</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            By providing your phone number to a congregation administrator, you consent to receive
-            SMS messages from Tower on behalf of your congregation. Messages may include meeting
-            reminders, announcements, and other congregation-related information.
+            Tower sends SMS messages only to members who separately opt in through the standalone
+            process described on the{' '}
+            <Link
+              to="/opt-in"
+              className="underline underline-offset-4 hover:text-foreground transition-colors"
+            >
+              SMS Opt-In Consent page
+            </Link>
+            . SMS consent is optional and is not required to accept these Terms, use Tower as an
+            administrator, participate in church activities, or receive church services. Messages
+            may include meeting reminders, schedule changes, announcements, service project
+            updates, volunteer coordination, and urgent congregation-related notices.
           </p>
           <ul className="text-sm text-muted-foreground leading-relaxed list-disc pl-6 flex flex-col gap-1">
             <li>Message frequency varies; most congregations send fewer than four messages per month.</li>
@@ -119,7 +128,8 @@ export default function Terms() {
         <section className="flex flex-col gap-2">
           <h2 className="font-medium text-lg">Contact</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            For questions about these Terms, please contact your congregation administrator.
+            For questions about these Terms or SMS support, please contact your congregation
+            administrator.
           </p>
         </section>
       </div>

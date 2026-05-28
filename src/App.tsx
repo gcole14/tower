@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import AcceptInvite from "@/pages/AcceptInvite";
 import OptIn from "@/pages/OptIn";
@@ -18,6 +19,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/accept-invite" element={<AcceptInvite />} />
           <Route path="/opt-in" element={<OptIn />} />

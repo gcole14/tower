@@ -56,6 +56,7 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
         .from('messages')
         .select('created_at')
         .eq('org_id', orgId)
+        .in('status', ['sent', 'failed', 'sending'])
         .gte('created_at', lastMonthStart.toISOString())
       if (error) throw error
       return data
@@ -72,6 +73,7 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
         .from('messages')
         .select('created_at')
         .eq('org_id', orgId)
+        .in('status', ['sent', 'failed', 'sending'])
         .gte('created_at', yearAgo.toISOString())
       if (error) throw error
       return data
@@ -86,6 +88,7 @@ export function OverviewTab({ orgId }: OverviewTabProps) {
         .from('messages')
         .select('*')
         .eq('org_id', orgId)
+        .in('status', ['sent', 'failed', 'sending'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()

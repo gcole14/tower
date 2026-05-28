@@ -27,7 +27,10 @@ export default function Login() {
 
   const onSubmit = async ({ email }: FormValues) => {
     setSending(true)
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    })
     setSending(false)
 
     if (error) {

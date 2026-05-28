@@ -54,17 +54,24 @@ export function InviteForm({ orgId, invitedBy }: InviteFormProps) {
   const onSubmit = async ({ email, role, org_id }: FormValues) => {
     const effectiveOrgId = ORG_SCOPED_ROLES.includes(role) ? org_id : orgId
 
-    const { error } = await supabase.functions.invoke('send-invite', {
-      body: { email, role, org_id: effectiveOrgId, invited_by: invitedBy },
-    })
+    const { data: invite, error } = await supabase
+      .from('invites')
+      .insert({ email, role, org_id: effectiveOrgId, invited_by: invitedBy })
+      .select('token')
+      .single()
 
     if (error) {
       toast.error(error.message)
       return
     }
 
+    const inviteUrl = `${window.location.origin}/accept-invite?token=${invite.token}`
+
     await queryClient.invalidateQueries({ queryKey: ['invites', orgId] })
-    toast.success(`Invite sent to ${email}`)
+    toast.success('Invite created! Share this link:', {
+      description: inviteUrl,
+      duration: 60000,
+    })
     reset({ email: '', role: 'comms_chair', org_id: orgId })
   }
 

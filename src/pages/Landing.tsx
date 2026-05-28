@@ -24,7 +24,7 @@ export default function Landing() {
         </div>
       </main>
 
-      <footer className="py-6 px-4 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+      <footer className="py-6 px-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
         <Link
           to="/privacy"
           className="underline underline-offset-4 hover:text-foreground transition-colors"
@@ -36,6 +36,12 @@ export default function Landing() {
           className="underline underline-offset-4 hover:text-foreground transition-colors"
         >
           Terms and Conditions
+        </Link>
+        <Link
+          to="/opt-in"
+          className="underline underline-offset-4 hover:text-foreground transition-colors"
+        >
+          SMS Opt-In Consent
         </Link>
       </footer>
     </div>

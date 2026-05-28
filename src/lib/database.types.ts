@@ -138,28 +138,34 @@ export type Database = {
         Row: {
           id: string
           org_id: string
-          sent_by: string
+          sent_by: string | null
           body: string
           scope: 'ward' | 'elders_quorum' | 'relief_society' | 'stake_all'
           recipient_count: number
+          status: 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled'
+          scheduled_at: string | null
           created_at: string
         }
         Insert: {
           id?: string
           org_id: string
-          sent_by: string
+          sent_by?: string | null
           body: string
           scope: 'ward' | 'elders_quorum' | 'relief_society' | 'stake_all'
           recipient_count?: number
+          status?: 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled'
+          scheduled_at?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           org_id?: string
-          sent_by?: string
+          sent_by?: string | null
           body?: string
           scope?: 'ward' | 'elders_quorum' | 'relief_society' | 'stake_all'
           recipient_count?: number
+          status?: 'scheduled' | 'sending' | 'sent' | 'failed' | 'cancelled'
+          scheduled_at?: string | null
           created_at?: string
         }
         Relationships: []

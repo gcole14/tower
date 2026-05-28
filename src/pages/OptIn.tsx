@@ -8,11 +8,14 @@ export default function OptIn() {
         </div>
 
         <section className="flex flex-col gap-2">
-          <h2 className="font-medium">What is Tower?</h2>
+          <h2 className="font-medium">Use case summary</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Tower is a volunteer-run communication tool used by local church congregations to send
-            SMS notifications to members. Messages may include meeting reminders, announcements,
-            and other congregation-related information.
+            non-commercial SMS notifications to members who have separately opted in. Messages may
+            include meeting reminders, schedule changes, congregation announcements, service
+            project updates, volunteer coordination, and urgent congregation-related notices.
+            Tower does not send marketing, promotional, fundraising, political, public solicitation,
+            or third-party advertising messages.
           </p>
         </section>
 
@@ -22,6 +25,16 @@ export default function OptIn() {
             Members are added to the system manually by a ward or congregation administrator who
             has collected their phone number and verbal or written consent. Members are not added
             without prior knowledge or agreement.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <h2 className="font-medium">Consent is separate</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            SMS consent is requested separately from any other agreement. It is not required to use
+            the Tower website, create an administrator account, participate in church activities,
+            receive church services, or agree to any Terms and Conditions. Members may decline SMS
+            messages and still participate in their congregation.
           </p>
         </section>
 
@@ -51,6 +64,28 @@ Do I have your permission to add your phone number — [recite the number back] 
             of the administrator who collected consent) before adding the number. If the member
             declines, the number is not added.
           </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <h2 className="font-medium">Written consent option</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            If consent is collected in writing, the administrator uses a standalone unchecked
+            checkbox or signature line that is separate from all other acknowledgments:
+          </p>
+          <blockquote
+            className="text-sm leading-relaxed rounded-2xl p-5 border"
+            style={{
+              background: 'color-mix(in oklch, white 92%, var(--color-primary) 8%)',
+              borderColor: 'oklch(0 0 0 / 0.06)',
+            }}
+          >
+            I agree to receive occasional SMS messages from Tower on behalf of my congregation,
+            including meeting reminders, announcements, schedule changes, service project updates,
+            volunteer coordination, and urgent congregation-related notices. Message frequency
+            varies, usually fewer than 4 messages per month. Message and data rates may apply.
+            Reply STOP to opt out or HELP for help. Consent is optional and is not a condition of
+            any other agreement. Privacy Policy: /privacy. Terms: /terms.
+          </blockquote>
         </section>
 
         <section className="flex flex-col gap-2">
